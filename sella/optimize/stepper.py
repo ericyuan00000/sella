@@ -89,18 +89,27 @@ class QuasiNewton(BaseStepper):
 
 
 class QuasiNewtonIRC(QuasiNewton):
+    alpha0 = 0.
+    alphamin = 0.
+    alphamax = np.infty
+    alphaslope = -1
+    beta0 = 0.
+    betamin = 0.
+    betamax = np.infty
+    betaslope = 1
     synonyms = []
 
     def _stepper_init(self) -> None:
         QuasiNewton._stepper_init(self)
         self.Vd1 = self.V.T @ self.d1
 
-    def get_s(self, alpha: float) -> Tuple[np.ndarray, np.ndarray]:
+    def get_s(self, alpha: float, beta: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         denom = np.abs(self.L) + alpha
-        sproj = -(self.Vg + alpha * self.Vd1) / denom
-        s = self.V @ sproj
-        dsda = -self.V @ ((sproj + self.Vd1) / denom)
-        return s, dsda
+        sproj = (self.Vg - beta * self.Vd1) / denom
+        s = -self.V @ sproj
+        dsda = self.V @ (sproj / denom)
+        dsdb = self.V @ (self.Vd1 / denom)
+        return s, dsda, dsdb
 
 
 class RationalFunctionOptimization(BaseStepper):

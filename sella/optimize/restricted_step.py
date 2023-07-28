@@ -140,13 +140,157 @@ class IRCTrustRegion(TrustRegion):
         assert sqrtm is not None
         self.sqrtm = sqrtm
         TrustRegion.__init__(self, *args, **kwargs)
-        assert self.d1 is not None
+        # assert self.d1 is not None
 
     def cons(self, s, dsda=None):
-        s = (s + self.d1) * self.sqrtm
+        s = s * self.sqrtm
         if dsda is not None:
             dsda = dsda * self.sqrtm
         return TrustRegion.cons(self, s, dsda)
+
+    # def cons(self, s, d1=None, dsda=None, dsdb=None):
+    #     s = s * self.sqrtm
+    #     val = np.linalg.norm(s)
+    #     if d1 is None and dsda is None and dsdb is None:
+    #         return val
+    #     d1 = d1 * self.sqrtm
+    #     dsda = dsda * self.sqrtm
+    #     dsdb = dsdb * self.sqrtm
+    #     proj = s @ d1
+    #     dval = dsda @ s / val
+    #     dproj = dsdb @ d1
+    #     return val, dval, proj, dproj
+    
+    # def eval(self, alpha, beta):
+    #     s, dsda, dsdb = self.stepper.get_s(alpha, beta)
+    #     stot = self.P.T @ s + self.scons
+    #     dtot = self.P.T @ self.d1
+    #     val, dval, proj, dproj = self.cons(stot, dtot, self.P.T @ dsda, self.P.T @ dsdb)
+    #     return stot, val, dval, proj, dproj
+
+    # def get_s(self):
+    #     # print('trying alpha = 0, beta = 0')
+    #     alpha = self.stepper.alpha0
+    #     beta = self.stepper.beta0
+    #     s, val, dval, proj, dproj = self.eval(alpha, beta)
+    #     # print('alpha', alpha, 'beta', beta, 'val', val, 'proj', proj)
+    #     if val < self.delta and proj >= 0:
+    #         assert val > 0.
+    #         return s, val
+        
+    #     # print('trying alpha > 0, beta = 0')
+    #     alpha = self.stepper.alpha0
+    #     beta = self.stepper.beta0
+    #     alphamin = self.stepper.alphamin
+    #     alphamax = self.stepper.alphamax
+    #     for niter in range(self.maxiter):
+    #         s, val, dval, proj, dproj = self.eval(alpha, beta)
+    #         # print('alpha', alpha, 'beta', beta, 'val', val, 'proj', proj)
+    #         err = val - self.delta
+
+    #         if (abs(err) <= self.tol or np.nextafter(alphamin, alphamax) >= alphamax):
+    #             if proj >= 0:
+    #                 assert val > 0.
+    #                 return s, val
+    #             else:
+    #                 break
+            
+    #         assert alpha <= alphamax and alpha >= alphamin
+    #         if err * self.stepper.alphaslope > 0:
+    #             alphamax = alpha
+    #         else:
+    #             alphamin = alpha
+
+    #         a1 = alpha - err / dval
+    #         if np.isnan(a1) or a1 <= alphamin or a1 >= alphamax or niter > 4:
+    #             a2 = (alphamin + alphamax) / 2.
+    #             if np.isinf(a2):
+    #                 alpha = alpha + max(1, 0.5 * alpha) * np.sign(a2)
+    #             else:
+    #                 alpha = a2
+    #         else:
+    #             alpha = a1
+        
+    #     # print('trying alpha = 0, beta > 0')
+    #     alpha = self.stepper.alpha0
+    #     beta = self.stepper.beta0
+    #     betamin = self.stepper.betamin
+    #     betamax = self.stepper.betamax
+    #     for niter in range(self.maxiter):
+    #         s, val, dval, proj, dproj = self.eval(alpha, beta)
+    #         # print('alpha', alpha, 'beta', beta, 'val', val, 'proj', proj)
+    #         err = val - self.delta
+
+    #         if (abs(proj) <= self.tol or np.nextafter(betamin, betamax) >= betamax):
+    #             if err <= 0:
+    #                 assert val > 0.
+    #                 return s, val
+    #             else:
+    #                 break
+            
+    #         assert beta <= betamax and beta >= betamin
+    #         if proj * self.stepper.betaslope > 0:
+    #             betamax = beta
+    #         else:
+    #             betamin = beta
+
+    #         b1 = beta - proj / dproj
+    #         if np.isnan(b1) or b1 <= betamin or b1 >= betamax or niter > 4:
+    #             b2 = (betamin + betamax) / 2.
+    #             if np.isinf(b2):
+    #                 beta = beta + max(1, 0.5 * beta) * np.sign(b2)
+    #             else:
+    #                 beta = b2
+    #         else:
+    #             beta = b1
+
+    #     # print('trying alpha > 0, beta > 0')
+    #     alpha = self.stepper.alpha0
+    #     beta = self.stepper.beta0
+    #     alphamin = self.stepper.alphamin
+    #     alphamax = self.stepper.alphamax
+    #     betamin = self.stepper.betamin
+    #     betamax = self.stepper.betamax
+    #     for niter in range(self.maxiter):
+    #         s, val, dval, proj, dproj = self.eval(alpha, beta)
+    #         # print('alpha', alpha, 'beta', beta, 'val', val, 'proj', proj)
+    #         err = val - self.delta
+
+    #         if (abs(err) <= self.tol or np.nextafter(alphamin, alphamax) >= alphamax) and (abs(proj) <= self.tol or np.nextafter(betamin, betamax) >= betamax):
+    #             assert val > 0.
+    #             return s, val
+            
+    #         assert alpha <= alphamax and alpha >= alphamin
+    #         if err * self.stepper.alphaslope > 0:
+    #             alphamax = alpha
+    #         else:
+    #             alphamin = alpha
+    #         assert beta <= betamax and beta >= betamin
+    #         if proj * self.stepper.betaslope > 0:
+    #             betamax = beta
+    #         else:
+    #             betamin = beta
+
+    #         a1 = alpha - err / dval
+    #         if np.isnan(a1) or a1 <= alphamin or a1 >= alphamax or niter > 4:
+    #             a2 = (alphamin + alphamax) / 2.
+    #             if np.isinf(a2):
+    #                 alpha = alpha + max(1, 0.5 * alpha) * np.sign(a2)
+    #             else:
+    #                 alpha = a2
+    #         else:
+    #             alpha = a1
+    #         b1 = beta - proj / dproj
+    #         if np.isnan(b1) or b1 <= betamin or b1 >= betamax or niter > 4:
+    #             b2 = (betamin + betamax) / 2.
+    #             if np.isinf(b2):
+    #                 beta = beta + max(1, 0.5 * beta) * np.sign(b2)
+    #             else:
+    #                 beta = b2
+    #         else:
+    #             beta = b1
+    #     else:
+    #         raise RuntimeError("Restricted step failed to converge!")
 
 
 class RestrictedAtomicStep(BaseRestrictedStep):

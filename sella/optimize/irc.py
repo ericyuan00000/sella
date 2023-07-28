@@ -10,7 +10,7 @@ from ase.optimize.optimize import Optimizer
 
 from sella.peswrapper import PES
 from .restricted_step import IRCTrustRegion
-from .stepper import QuasiNewtonIRC
+from .stepper import QuasiNewton, QuasiNewtonIRC
 
 
 class IRCInnerLoopConvergenceFailure(RuntimeError):
@@ -129,28 +129,30 @@ class IRC(Optimizer):
                 self.pes,
                 0,
                 self.dx,
-                method=QuasiNewtonIRC,
+                # method=QuasiNewtonIRC,
+                method=QuasiNewton,
                 sqrtm=self.sqrtm,
-                d1=self.d1,
+                # d1=self.d1,
                 W=self.get_W(),
             ).get_s()
 
             bound_clip = abs(smag - self.dx) < 1e-8
-            self.d1 += s
+            # self.d1 += s
 
             self.pes.kick(s)
             g1 = self.pes.get_g()
 
-            d1m = self.d1 * self.sqrtm
-            d1m /= np.linalg.norm(d1m)
-            g1m = g1 / self.sqrtm
+            # d1m = self.d1 * self.sqrtm
+            # d1m /= np.linalg.norm(d1m)
+            # g1m = g1 / self.sqrtm
 
-            g1m_proj = g1m - d1m * (d1m @ g1m)
-            fmax = np.linalg.norm(
-                (g1m_proj * self.sqrtm).reshape((-1, 3)), axis=1
-            ).max()
+            # g1m_proj = g1m - d1m * (d1m @ g1m)
+            # fmax = np.linalg.norm(
+            #     (g1m_proj * self.sqrtm).reshape((-1, 3)), axis=1
+            # ).max()
+            fmax = np.linalg.norm(g1.reshape((-1, 3)), axis=1).max()
 
-            g1m /= np.linalg.norm(g1m)
+            # g1m /= np.linalg.norm(g1m)
             if bound_clip and fmax < self.fmax_inner:
                 break
             elif self.converged():
@@ -164,7 +166,7 @@ class IRC(Optimizer):
             else:
                 raise IRCInnerLoopConvergenceFailure
 
-        self.d1 *= 0.
+        # self.d1 *= 0.
 
     def converged(self, forces=None):
         return self.pes.converged(self.fmax)[0] and self.pes.H.evals[0] > 0
